@@ -2,6 +2,10 @@ angular.module('cs411', ['ngRoute', 'ngCookies'])
 
     .controller('cs411ctrl', function ($scope, $http, $cookies) {
 
+        $scope.makeItUpper = function () {
+            $scope.name = $scope.name.toUpperCase()
+        }
+
         //CREATE (POST)
         $scope.createUser = function () {
             if ($scope.dbID) {
@@ -22,6 +26,8 @@ angular.module('cs411', ['ngRoute', 'ngCookies'])
                             $scope.inputForm.$setPristine()
                             $scope.name = $scope.UID = $scope.department = ''
                             $scope.getUsers()
+                            var authCookie = $cookies.get('twitterAccessJwt')
+                            $scope.isAuthorized = authCookie
                             console.log(response)
                         },
                         function (error) {
@@ -29,6 +35,7 @@ angular.module('cs411', ['ngRoute', 'ngCookies'])
                                 $scope.authorized = false
                                 $scope.h2message = "Not authorized to add "
                                 console.log(error)
+                                console.log(error.data)
                             }
                         }
                     )
@@ -91,23 +98,23 @@ angular.module('cs411', ['ngRoute', 'ngCookies'])
                 )
         }
 
-      /*  $scope.getAuth = function () {
-            const request = {
-                method: 'get',
-                url: 'http://localhost:3000/api/db/auth'
-            }
-            $http.request(request)
-                .then(function (err, response) {
-                    if (err) {
-                        $scope.authorized = false
-                    }
+        /*  $scope.getAuth = function () {
+              const request = {
+                  method: 'get',
+                  url: 'http://localhost:3000/api/db/auth'
+              }
+              $http.request(request)
+                  .then(function (err, response) {
+                      if (err) {
+                          $scope.authorized = false
+                      }
 
-                    else {
-                        $scope.authorized = true
-                    }
-                })
+                      else {
+                          $scope.authorized = true
+                      }
+                  })
 
-*/
+  */
         $scope.initApp = function () {
             $scope.buttonState = "create"
             $scope.h2message = "Add user"
@@ -117,7 +124,8 @@ angular.module('cs411', ['ngRoute', 'ngCookies'])
             $scope.getUsers()
 //            $scope.getAuth()
             //Grab cookies if present
-            let authCookie = $cookies.get('authStatus')
+            //let authCookie = $cookies.get('authStatus')
+            let authCookie = $cookies.get('twitterAccessJwt')
             $scope.authorized = !!authCookie
         }
 
@@ -180,7 +188,9 @@ angular.module('cs411', ['ngRoute', 'ngCookies'])
         $scope.doTwitterAuth = function () {
             var openUrl = '/auth/twitter/'
             //Total hack, this:
-            $scope.authorized = true
+
+//            $scope.authorized = true
+            $scope.authorized = $cookies.get('authStatus')
             window.location.replace(openUrl)
 
         }
@@ -214,7 +224,7 @@ angular.module('cs411', ['ngRoute', 'ngCookies'])
 
     })
     .controller('BUController', function ($scope) {
-$scope.message = "You MUSTgive money to the alumni fund!"
+            $scope.message = "You MUST give money to the alumni fund!"
         }
     )
 
@@ -227,3 +237,10 @@ $scope.message = "You MUSTgive money to the alumni fund!"
             $scope.display = !$scope.display
         }
     })
+
+setInterval(
+    function () {
+        console.log('BOO')
+    }, 5000
+)
+console.log('BAR')

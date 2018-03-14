@@ -23,12 +23,13 @@ const passportOptions = {
 
 /*
  Once authenticated, Twitter will pass back oauth tokens and the user's Twitter profile,
- which we will use as a key in the database. Passport uses the Twitter IDfrom the
+ which we will use as a key in the database. Passport uses the Twitter ID from the
  profile in its serialize/deserialize methods
  */
 
 passport.use(new TwitterStrategy(passportOptions,
     function (token, tokenSecret, profile, done) {
+    console.log("In strategy")
         User.findOneAndUpdate({twitterID: profile.id},
             {
                 twitterID: profile.id,
@@ -79,12 +80,16 @@ router.get('/logout', function (req, res, next) {
 router.get('/twitter',
     passport.authenticate('twitter'))
 
+
 //OAuth Step 2
 router.get('/callback',
     passport.authenticate('twitter',
         {failureRedirect: '/login',}),
     function (req, res) {
-        res.cookie('authStatus', 'true')
+    console.log("Step 2")
+        res.cookie('authStatus', 'true',
+            {httpOnly: true}
+            )
         res.redirect('/')
     })
 

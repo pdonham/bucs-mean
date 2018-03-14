@@ -31,6 +31,7 @@
 <div ng-controller="cs411ctrl" ng-init="initApp()">
     <img src="/images/master-logo.gif"><span class="largeText">  Department of Computer Science</span>
     <h2>{{h2message}} {{name}}</h2>
+    <h3>Authorization: {{isAuthorized}}</h3>
     <div>
         <form class="form-inline" name="inputForm" >
             <div class="form-group">
@@ -50,6 +51,7 @@
             <button type="submit" class="btn btn-primary" ng-disabled="inputForm.$invalid" ng-click="createUser()">
                 {{buttonMessage}}
             </button>
+            {{name}} <button ng-click="makeItUpper()">UPPER</button>
         </form>
         <br/>
         <div ng-hide="authorized">
@@ -98,5 +100,9 @@
 </html>
 
 
+<form method="post" action="http://localhost:3000/search">
+    <input name="location" type="text">
+    <button type="submit">Search</button>
+</form>
 
-Polyfill
+

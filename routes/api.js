@@ -19,7 +19,11 @@ const people = mongoose.model('people', personSchema)
 
 
 // POST Create a new user (only available to logged-in users)
+//
 router.post('/db', authorized, function (req, res, next) {
+    if (res.statusCode == 401) {
+        console.log("Unauth attempt:", res.reason.message)
+    }
     aPerson = new people(
         req.body
     )

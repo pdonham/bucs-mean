@@ -13,6 +13,7 @@
  Most of you will be doing something similar...make an API call, and then use the results
  in a second API call.
  */
+"use strict";
 
 const express = require('express')
 const router = express.Router()
@@ -31,18 +32,15 @@ const async = require('async')
 /*
  Only one route (http://localhost:3000/rp) for this demo. All this route does is log
  a message to the console and then start the asynchronous waterfall. The signature
- for async.waterfall is ([array of functions in order], final function (optional)
+ for async.waterfall is ([array of functions in order], final function (optional))
 
  In the waterfall, each function is passed a callback to the next function in the line,
  so in each function the last thing to do is call the callback, which expects an error
  object (which is null if there are no errors to report) and one or more parameters
  to hand to the next function.
 
- Once all three functions are done, a final function renders a Pug page with a table
- of results (yes, I know I said you have to use Angular for the front end...I used Pug
- here for speed and simplicity. YOU still have to use Angular.)
-
- That last function (function (err, result, city)) is called from the final function
+ Once all three functions are done, a final function renders a Pug page with a simple table
+ of results. That last function (function (err, result, city)) is called from the final function
  in the waterfall (findGitHubRepos), and then we just render a Pug page with the information.
  */
 
@@ -50,8 +48,14 @@ router.route('/')
     .get(function (req, res, next) {
         console.log('Starting waterfall')
         async.waterfall([getCityTemperatures, getHottestCity, findGitHubRepos],
-            function (err, result, city) {
-                res.render('gitHot', {result: result, city: city})
+            function renderTable(err, result, city) {
+                if (err) {
+                    res.render('gitHot', {result: 'Error processing'})
+                }
+                else {
+
+                    res.render('gitHot', {result: result, city: city})
+                }
             })
     })
 
@@ -64,15 +68,16 @@ router.route('/')
  until all of the city weather has been collected.
 
  In each API call, once the current temperature is known it is plugged into the city's object
- in the array.
+ in the array. (Note that weathers.co doesn't always return the actual current temperature.
+ Often it is a cached value.)
 
  The technique here is to create a Promise that encompasses the API calls. That's the first
- return new Promise
- at the top of the function. A SECOND Promise is set up in the local function getWeather, and
- that's the one that does each city's API call. request.get() itself returns a Promise (because
+ 'return new Promise()' at the top of the function. A SECOND Promise is set up in the local function getWeather,
+ and that's the one that does each city's API call. request.get() itself returns a Promise (because
  we are using the request-promise-lite package), and so we make the request.get() and follow
  it with a .then() which will run when the API call returns. The resolve() at the end of the .then()
- gets us out of this inner Promise and on to the next one.
+ gets us out of this inner Promise and on to the next one. Note that we don't initially execute getWeather(),
+ we're just defining it.
  */
 const getCityTemperatures = function (cb) {
     return new Promise(function (resolve, reject) {
@@ -80,7 +85,7 @@ const getCityTemperatures = function (cb) {
         let cities = [
             {name: 'Miami', temperature: null},
             {name: 'Atlanta', temperature: null},
-            {name: 'Portland', temperature: null}
+            {name: 'Boston', temperature: null}
         ]
         let getWeather = function (city) {
             return new Promise(function (resolve, reject) {
@@ -117,6 +122,9 @@ const getCityTemperatures = function (cb) {
             .then(function () {
                 cb(null, cities)
             })
+            .catch(function (err) {
+                console.log(err)
+            })
 
     })
 }
@@ -124,15 +132,15 @@ const getCityTemperatures = function (cb) {
 /*
  getCityTemperatures returns an array of city objects, which is passed to getHottestCity along
  with a callback to the next function in the waterfall. Not much going on here, we just want
- to find the hottest city in the array and pass it along to the next function in the callback.
+ to find the hottest city in the array and pass it along to the next function through the callback.
  */
 const getHottestCity = function (cities, cb) {
     console.log('Finding hottest city')
     //Get a slice with just temperatures and find the largest
-    let largestTemperature = Math.max(...Array.from(cities, o => o.temperature))
+    let largestTemperature = Math.max(...Array.from(cities, city => city.temperature))
 
     //Find the object in the array that has that largest temperature
-    let hottestCity = cities.find(o => o.temperature == largestTemperature)
+    let hottestCity = cities.find(city => city.temperature == largestTemperature)
 
     console.log('Hottest city?', hottestCity.name)
 
@@ -147,7 +155,7 @@ const getHottestCity = function (cities, cb) {
  GitHub requires a User-Agent header, and that is set as an option in request.get().
  The request returns a Promise and so is thenable, so we make the call, and when the
  results are ready an object is created for each item in the response (there are 30
- by default) with a few intersting bits of information. These are pushed onto an
+ by default) with a few interesting bits of information. These are pushed onto an
  array that we'll return.
  */
 const findGitHubRepos = function (city, cb) {
@@ -156,7 +164,7 @@ const findGitHubRepos = function (city, cb) {
     let GitHubSearchURL = 'http://api.github.com/search/repositories?q='
     request.get(GitHubSearchURL + city.name, {
         json: true, headers: {
-            'User-Agent': 'pdonham'
+            'User-Agent': 'yourString'
         }
     })
         .then(function (response) {
@@ -168,8 +176,6 @@ const findGitHubRepos = function (city, cb) {
                 }
                 resultArray.push(gitInfo)
             })
-
-//All done with this API...send both the array of results and the hot city back
 
             cb(null, resultArray, city)
         })

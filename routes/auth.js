@@ -20,7 +20,7 @@ const passport = require('passport')
 
 const passportOptions = {
     passReqToCallback: true,
-    failureFlash     : true
+    failureFlash: true
 }
 
 passport.use(new LocalStrategy(passportOptions,
@@ -66,6 +66,8 @@ router.get('/login', function (req, res, next) {
     res.render('login', {message: req.flash('message')})
 })
 router.get('/success', function (req, res, next) {
+    res.cookie('authStatus', 'true',
+        {httpOnly: true} )
     res.redirect('/')
 })
 
@@ -78,7 +80,7 @@ router.get('/logout', function (req, res, next) {
 router.post('/register', function (req, res, next) {
     let user = new User({
         'username': req.body.username,
-        'name'    : req.body.name
+        'name': req.body.name
     })
     user.setPassword(req.body.password)
     user.save()
@@ -94,3 +96,4 @@ router.get('/register', function (req, res, next) {
 })
 
 module.exports = router
+

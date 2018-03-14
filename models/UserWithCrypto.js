@@ -22,7 +22,7 @@ const Schema = mongoose.Schema
 const user = new Schema({
     username    : {
         type    : String,
-        required: true,
+//        required: true,
         unique  : true
     },
     passwordHash: String,
@@ -32,7 +32,10 @@ const user = new Schema({
         type    : String,
         required: true
     },
-    twitterID: String
+    twitterID: String,
+    twitterAccessToken: String,
+    twitterAccessTokenSecret: String,
+    twitterAccessTokenHash: String
 })
 
 //Set up the findOrCreate plugin
@@ -58,3 +61,4 @@ user.methods.checkPassword = function (password) {
 const User = mongoose.model('tweets', user)
 
 module.exports = User
+

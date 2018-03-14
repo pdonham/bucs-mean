@@ -20,6 +20,8 @@ const flash = require('connect-flash')
 const api = require('./routes/api')
 const auth = require('./routes/authTwitter')
 const rp = require('./routes/request-promises')
+const oauth = require('./routes/oauthTwitterNoPassport')
+const geocoding = require('./routes/geocoding')
 
 
 const app = express()
@@ -42,10 +44,12 @@ app.use(session({ secret: 'this is not a secret' }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-//Back end APIis sered on the /api route
+//Back end API is served on the /api route
 app.use('/api', api);
-app.use('/auth', auth)
+app.use('/auth', oauth)
+//app.use('/auth', auth)
 app.use('/rp', rp)
+app.use('/geocoding', geocoding)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
