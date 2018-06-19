@@ -20,7 +20,9 @@ const people = mongoose.model('people', personSchema)
 
 // POST Create a new user (only available to logged-in users)
 //
-router.post('/db', authorized, function (req, res, next) {
+//todo Temporarily removed auth check from this route for Angular demo
+//router.post('/db', authorized, function (req, res, next) {
+router.post('/db', function (req, res, next) {
     if (res.statusCode == 401) {
         console.log("Unauth attempt:", res.reason.message)
     }
